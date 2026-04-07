@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     where,
     include: {
       reactions: true,
+      _count: { select: { comments: true } },
     },
     orderBy: sort === "latest" ? { createdAt: "desc" } : undefined,
   });
@@ -39,6 +40,7 @@ export async function GET(req: NextRequest) {
       createdAt: s.createdAt.toISOString(),
       reactions: counts,
       totalReactions,
+      commentCount: s._count.comments,
     };
   });
 
@@ -75,5 +77,6 @@ export async function POST(req: NextRequest) {
     createdAt: submission.createdAt.toISOString(),
     reactions: { DID_NOT: 0, GOT_THIS_TOO: 0, AUDACITY: 0, SENDING_LOVE: 0 },
     totalReactions: 0,
+    commentCount: 0,
   }, { status: 201 });
 }

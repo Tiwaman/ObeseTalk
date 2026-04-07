@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import ReactionButton from "./ReactionButton";
+import CommentThread from "./CommentThread";
 import { relativeTime, cardRotation, WHO_EMOJI, WHERE_EMOJI, type ReactionType } from "@/lib/utils";
 
 export interface SubmissionData {
@@ -13,6 +14,7 @@ export interface SubmissionData {
   createdAt: string;
   reactions: Record<string, number>;
   totalReactions: number;
+  commentCount: number;
 }
 
 interface SubmissionCardProps {
@@ -95,6 +97,12 @@ export default function SubmissionCard({ submission, isNew, isGold, index = 0 }:
           )
         )}
       </div>
+
+      {/* Comment Thread */}
+      <CommentThread
+        submissionId={submission.id}
+        commentCount={submission.commentCount ?? 0}
+      />
     </motion.div>
   );
 }

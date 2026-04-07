@@ -16,6 +16,22 @@ model Submission {
   submitterName String?
   createdAt     DateTime   @default(now())
   reactions     Reaction[]
+  comments      Comment[]
+}
+
+model Comment {
+  id           String     @id @default(cuid())
+  text         String
+  authorName   String?
+  submissionId String
+  parentId     String?
+  createdAt    DateTime   @default(now())
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  parent       Comment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[]  @relation("CommentReplies")
+
+  @@index([submissionId])
+  @@index([parentId])
 }
 
 model Reaction {
