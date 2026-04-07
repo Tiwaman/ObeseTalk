@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Unsolicited Advice Jar — ObseTalk
 
-## Getting Started
+A cathartic, community-powered web app where people in bigger bodies can drop every ridiculous piece of unsolicited weight advice they've received into a virtual jar. See that you're not alone — because 847 other people got that one too.
 
-First, run the development server:
+Part of [ObseTalk.com](https://obesetalk.com) — a safe community for obese/plus-size people.
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env
+npx prisma migrate dev --name init
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then visit [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Frontend:** Next.js 14 (App Router) + TypeScript + Tailwind CSS
+- **Backend:** Next.js API Routes
+- **Database:** SQLite with Prisma ORM
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
 
-## Learn More
+## Upgrading to PostgreSQL for Production
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Update `DATABASE_URL` in `.env` to your PostgreSQL connection string:
+   ```
+   DATABASE_URL="postgresql://user:password@host:5432/obesetalk"
+   ```
+2. Change `provider` in `prisma/schema.prisma` from `"sqlite"` to `"postgresql"`
+3. Run `npx prisma migrate dev --name postgres-migration`
+4. Run `npx prisma db seed` to seed the database

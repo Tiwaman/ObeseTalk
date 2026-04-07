@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Submission {
+  id            String     @id @default(cuid())
+  text          String
+  whoSaidIt     String?
+  whereSaid     String?
+  submitterName String?
+  createdAt     DateTime   @default(now())
+  reactions     Reaction[]
+}
+
+model Reaction {
+  id           String     @id @default(cuid())
+  submissionId String
+  type         String
+  createdAt    DateTime   @default(now())
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@index([type])
+}
