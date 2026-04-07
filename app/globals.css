@@ -35,3 +35,41 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #A08B6E;
 }
+
+/* Shining border animation for the submission form */
+@keyframes shimmer-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.shimmer-border {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  padding: 2px;
+}
+
+.shimmer-border::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 30%,
+    #E8735A 38%,
+    #f4a896 50%,
+    #E8735A 62%,
+    transparent 70%,
+    transparent 100%
+  );
+  animation: shimmer-rotate 3s linear infinite;
+}
+
+.shimmer-border::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: white;
+  border-radius: calc(1rem - 2px);
+}

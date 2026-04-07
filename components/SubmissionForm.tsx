@@ -61,9 +61,10 @@ export default function SubmissionForm({ onSubmit, onToast }: SubmissionFormProp
 
   return (
     <div className="relative max-w-2xl mx-auto mb-10">
+      <div className="shimmer-border rounded-2xl shadow-md">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-2xl shadow-md border border-warm-brown/10 p-5 md:p-6"
+        className="bg-white rounded-2xl p-5 md:p-6 relative z-10"
       >
         <textarea
           value={text}
@@ -120,6 +121,7 @@ export default function SubmissionForm({ onSubmit, onToast }: SubmissionFormProp
           </button>
         </div>
       </form>
+      </div>
 
       {/* Drop animation overlay */}
       <AnimatePresence>
