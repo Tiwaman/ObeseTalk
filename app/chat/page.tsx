@@ -108,7 +108,13 @@ export default function ChatLobbyPage() {
           className="w-full max-w-sm"
         >
           <div className="text-center mb-8">
-            <div className="text-5xl mb-4">💬</div>
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              className="text-5xl mb-4"
+            >
+              💬
+            </motion.div>
             <h1 className="font-serif text-2xl text-warm-brown font-semibold mb-2">
               Join the Chat
             </h1>
@@ -342,14 +348,23 @@ export default function ChatLobbyPage() {
 
           {rooms.length === 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
               className="text-center py-16"
             >
-              <div className="text-4xl mb-3">🫧</div>
-              <p className="font-sans text-sm text-warm-brown/40">
-                No rooms yet. Create the first one!
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="text-5xl mb-4"
+              >
+                🫧
+              </motion.div>
+              <p className="font-sans text-sm text-warm-brown/40 mb-1">
+                No rooms yet.
+              </p>
+              <p className="font-sans text-xs text-warm-brown/30">
+                Create the first one and start chatting!
               </p>
             </motion.div>
           )}

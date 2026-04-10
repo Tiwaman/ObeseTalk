@@ -7,16 +7,24 @@ export async function POST(
 ) {
   const { roomId } = params;
   const body = await req.json();
-  const { username } = body;
+  const { username, typing } = body;
 
   if (!username || typeof username !== "string") {
     return NextResponse.json({ error: "Username required" }, { status: 400 });
   }
 
+  const now = new Date();
   await prisma.chatPresence.upsert({
     where: { roomId_username: { roomId, username: username.trim() } },
-    update: { lastSeen: new Date() },
-    create: { roomId, username: username.trim() },
+    update: {
+      lastSeen: now,
+      ...(typing ? { typingAt: now } : {}),
+    },
+    create: {
+      roomId,
+      username: username.trim(),
+      ...(typing ? { typingAt: now } : {}),
+    },
   });
 
   return NextResponse.json({ ok: true });

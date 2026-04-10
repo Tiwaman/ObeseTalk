@@ -61,10 +61,22 @@ export async function GET(
 
           // Send presence count
           const cutoff = new Date(Date.now() - 30000); // active in last 30s
-          const activeCount = await prisma.chatPresence.count({
+          const activePresence = await prisma.chatPresence.findMany({
             where: { roomId, lastSeen: { gte: cutoff } },
+            select: { username: true, typingAt: true },
           });
-          send("presence", { count: activeCount });
+          send("presence", { count: activePresence.length });
+
+          // Send typing indicators (typed in last 3s)
+          const typingCutoff = new Date(Date.now() - 3000);
+          const typers = activePresence
+            .filter((p) => p.typingAt && p.typingAt >= typingCutoff)
+            .map((p) => p.username);
+          if (typers.length > 0) {
+            for (const u of typers) {
+              send("typing", { username: u });
+            }
+          }
         } catch {
           // DB error, skip this tick
         }

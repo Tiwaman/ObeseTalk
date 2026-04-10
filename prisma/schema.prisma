@@ -72,6 +72,7 @@ model ChatPresence {
   roomId     String
   username   String
   lastSeen   DateTime @default(now())
+  typingAt   DateTime?
 
   @@unique([roomId, username])
   @@index([roomId, lastSeen])

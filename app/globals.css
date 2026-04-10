@@ -4,7 +4,19 @@
 
 html {
   scroll-behavior: smooth;
+  /* Safe area for notched/dynamic island phones */
+  padding-env: safe-area-inset-top safe-area-inset-right safe-area-inset-bottom safe-area-inset-left;
 }
+
+/* Typing dots animation */
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-3px); }
+}
+
+.typing-dot:nth-child(1) { animation: typing-bounce 1.2s infinite 0s; }
+.typing-dot:nth-child(2) { animation: typing-bounce 1.2s infinite 0.15s; }
+.typing-dot:nth-child(3) { animation: typing-bounce 1.2s infinite 0.3s; }
 
 body {
   background-color: #FFF8F0;
