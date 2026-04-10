@@ -44,3 +44,25 @@ model Reaction {
   @@index([submissionId])
   @@index([type])
 }
+
+model ChatRoom {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  createdBy   String?
+  createdAt   DateTime      @default(now())
+  messages    ChatMessage[]
+
+  @@index([createdAt])
+}
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  text       String
+  authorName String   @default("Anonymous")
+  roomId     String
+  createdAt  DateTime @default(now())
+  room       ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
+}
