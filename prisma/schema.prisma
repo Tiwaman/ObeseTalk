@@ -66,3 +66,13 @@ model ChatMessage {
 
   @@index([roomId, createdAt])
 }
+
+model ChatPresence {
+  id         String   @id @default(cuid())
+  roomId     String
+  username   String
+  lastSeen   DateTime @default(now())
+
+  @@unique([roomId, username])
+  @@index([roomId, lastSeen])
+}

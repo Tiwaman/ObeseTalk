@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Circle } from "lucide-react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
@@ -30,6 +30,7 @@ export default function ChatRoomPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastTimestampRef = useRef<string | null>(null);
@@ -78,34 +79,101 @@ export default function ChatRoomPage() {
       .catch(() => {});
   }, [roomId, scrollToBottom]);
 
-  // Poll for new messages every 2s
+  // SSE for real-time messages with polling fallback
   useEffect(() => {
-    const poll = () => {
-      const after = lastTimestampRef.current;
-      const url = after
-        ? `/api/chat/rooms/${roomId}/messages?after=${encodeURIComponent(after)}`
-        : `/api/chat/rooms/${roomId}/messages`;
+    let eventSource: EventSource | null = null;
+    let fallbackInterval: ReturnType<typeof setInterval> | null = null;
+    let useSSE = true;
 
-      fetch(url)
-        .then((r) => r.json())
-        .then((newMsgs: ChatMessage[]) => {
-          if (newMsgs.length > 0) {
-            setMessages((prev) => {
-              const existingIds = new Set(prev.map((m) => m.id));
-              const unique = newMsgs.filter((m) => !existingIds.has(m.id));
-              if (unique.length === 0) return prev;
-              return [...prev, ...unique];
-            });
-            lastTimestampRef.current = newMsgs[newMsgs.length - 1].createdAt;
-            setTimeout(() => scrollToBottom(), 50);
-          }
-        })
-        .catch(() => {});
+    const addMessage = (msg: ChatMessage) => {
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev;
+        return [...prev, msg];
+      });
+      lastTimestampRef.current = msg.createdAt;
+      setTimeout(() => scrollToBottom(), 50);
     };
 
-    const interval = setInterval(poll, 2000);
-    return () => clearInterval(interval);
+    const startSSE = () => {
+      const after = lastTimestampRef.current;
+      const url = after
+        ? `/api/chat/rooms/${roomId}/stream?after=${encodeURIComponent(after)}`
+        : `/api/chat/rooms/${roomId}/stream`;
+
+      eventSource = new EventSource(url);
+
+      eventSource.addEventListener("message", (e) => {
+        try {
+          const msg = JSON.parse(e.data) as ChatMessage;
+          addMessage(msg);
+        } catch { /* ignore */ }
+      });
+
+      eventSource.addEventListener("presence", (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          setOnlineCount(data.count || 0);
+        } catch { /* ignore */ }
+      });
+
+      eventSource.onerror = () => {
+        eventSource?.close();
+        eventSource = null;
+        if (useSSE) {
+          // Fallback to polling
+          startPolling();
+          // Try SSE again after 10s
+          setTimeout(() => {
+            if (useSSE && !eventSource) {
+              if (fallbackInterval) clearInterval(fallbackInterval);
+              fallbackInterval = null;
+              startSSE();
+            }
+          }, 10000);
+        }
+      };
+    };
+
+    const startPolling = () => {
+      if (fallbackInterval) return;
+      fallbackInterval = setInterval(() => {
+        const after = lastTimestampRef.current;
+        const url = after
+          ? `/api/chat/rooms/${roomId}/messages?after=${encodeURIComponent(after)}`
+          : `/api/chat/rooms/${roomId}/messages`;
+
+        fetch(url)
+          .then((r) => r.json())
+          .then((msgs: ChatMessage[]) => {
+            msgs.forEach(addMessage);
+          })
+          .catch(() => {});
+      }, 2000);
+    };
+
+    startSSE();
+
+    return () => {
+      useSSE = false;
+      eventSource?.close();
+      if (fallbackInterval) clearInterval(fallbackInterval);
+    };
   }, [roomId, scrollToBottom]);
+
+  // Presence heartbeat every 15s
+  useEffect(() => {
+    const sendHeartbeat = () => {
+      fetch(`/api/chat/rooms/${roomId}/presence`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      }).catch(() => {});
+    };
+
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 15000);
+    return () => clearInterval(interval);
+  }, [roomId, username]);
 
   const handleSend = async () => {
     const text = input.trim();
@@ -201,9 +269,17 @@ export default function ChatRoomPage() {
               </p>
             )}
           </div>
-          <span className="font-sans text-xs text-warm-brown/40 flex-shrink-0">
-            {username}
-          </span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {onlineCount > 0 && (
+              <span className="font-sans text-xs text-green-600 flex items-center gap-1">
+                <Circle size={8} fill="currentColor" />
+                {onlineCount}
+              </span>
+            )}
+            <span className="font-sans text-xs text-warm-brown/40">
+              {username}
+            </span>
+          </div>
         </div>
       </motion.header>
 

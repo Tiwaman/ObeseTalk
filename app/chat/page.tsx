@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, Plus, ArrowLeft, Users, X } from "lucide-react";
+import { MessageCircle, Plus, ArrowLeft, Users, X, Circle } from "lucide-react";
 import Link from "next/link";
 
 interface ChatRoom {
@@ -12,6 +12,12 @@ interface ChatRoom {
   createdBy: string | null;
   createdAt: string;
   messageCount: number;
+  lastMessage: {
+    text: string;
+    authorName: string;
+    createdAt: string;
+  } | null;
+  activeUsers: number;
 }
 
 export default function ChatLobbyPage() {
@@ -287,21 +293,36 @@ export default function ChatLobbyPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-serif text-base text-warm-brown font-semibold group-hover:text-coral transition-colors truncate">
-                      {room.name}
-                    </h3>
-                    {room.description && (
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-serif text-base text-warm-brown font-semibold group-hover:text-coral transition-colors truncate">
+                        {room.name}
+                      </h3>
+                      {room.activeUsers > 0 && (
+                        <span className="flex items-center gap-1 font-sans text-[11px] text-green-600 flex-shrink-0">
+                          <Circle size={6} fill="currentColor" />
+                          {room.activeUsers}
+                        </span>
+                      )}
+                    </div>
+                    {room.lastMessage ? (
+                      <p className="font-sans text-xs text-warm-brown/45 mt-0.5 truncate">
+                        <span className="font-medium">{room.lastMessage.authorName}:</span>{" "}
+                        {room.lastMessage.text}
+                      </p>
+                    ) : room.description ? (
                       <p className="font-sans text-xs text-warm-brown/50 mt-0.5 truncate">
                         {room.description}
                       </p>
-                    )}
+                    ) : null}
                     <div className="flex items-center gap-3 mt-2">
                       <span className="font-sans text-xs text-warm-brown/35 flex items-center gap-1">
                         <MessageCircle size={12} />
-                        {room.messageCount} messages
+                        {room.messageCount}
                       </span>
                       <span className="font-sans text-xs text-warm-brown/35">
-                        {relativeTime(room.createdAt)}
+                        {room.lastMessage
+                          ? relativeTime(room.lastMessage.createdAt)
+                          : relativeTime(room.createdAt)}
                       </span>
                       {room.createdBy && (
                         <span className="font-sans text-xs text-warm-brown/35 flex items-center gap-1">

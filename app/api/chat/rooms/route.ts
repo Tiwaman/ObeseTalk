@@ -6,8 +6,23 @@ export async function GET() {
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { messages: true } },
+      messages: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: { createdAt: true, authorName: true, text: true },
+      },
     },
   });
+
+  const presenceCutoff = new Date(Date.now() - 30000);
+  const presenceCounts = await prisma.chatPresence.groupBy({
+    by: ["roomId"],
+    where: { lastSeen: { gte: presenceCutoff } },
+    _count: { roomId: true },
+  });
+  const presenceMap = new Map(
+    presenceCounts.map((p) => [p.roomId, p._count.roomId])
+  );
 
   const mapped = rooms.map((r) => ({
     id: r.id,
@@ -16,6 +31,14 @@ export async function GET() {
     createdBy: r.createdBy,
     createdAt: r.createdAt.toISOString(),
     messageCount: r._count.messages,
+    lastMessage: r.messages[0]
+      ? {
+          text: r.messages[0].text,
+          authorName: r.messages[0].authorName,
+          createdAt: r.messages[0].createdAt.toISOString(),
+        }
+      : null,
+    activeUsers: presenceMap.get(r.id) || 0,
   }));
 
   return NextResponse.json(mapped);
