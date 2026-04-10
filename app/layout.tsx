@@ -15,9 +15,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "The Unsolicited Advice Jar — ObeseTalk",
+  title: {
+    default: "ObeseTalk",
+    template: "%s — ObeseTalk",
+  },
   description:
-    "A place to drop every ridiculous thing someone said to you about your body. You're not alone.",
+    "A place built with love, for people who deserve better.",
 };
 
 export default function RootLayout({

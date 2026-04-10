@@ -153,7 +153,7 @@ export default function ChatLobbyPage() {
               className="font-sans text-xs text-warm-brown/40 hover:text-coral transition-colors inline-flex items-center gap-1"
             >
               <ArrowLeft size={12} />
-              Back to The Jar
+              Back Home
             </Link>
           </div>
         </motion.div>
