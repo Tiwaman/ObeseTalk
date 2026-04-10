@@ -63,6 +63,12 @@ export default function HomePage() {
           </a>
           <nav className="flex items-center gap-4">
             <a
+              href="/chat"
+              className="font-sans text-xs text-coral font-medium hover:text-coral-dark transition-colors"
+            >
+              💬 Chat
+            </a>
+            <a
               href="#hall-of-audacity"
               className="font-sans text-xs text-warm-brown/50 hover:text-coral transition-colors"
             >
